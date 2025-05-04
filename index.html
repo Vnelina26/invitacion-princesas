@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>¡Invitación Real! ✨</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #ffcce6, #ffb3d9, #ff99cc, #ff80bf);
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            cursor: pointer;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            /* Cambiado para permitir scroll */
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Reemplaza el background del body por esto: */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #ffcce6, #ffb3d9, #ff99cc, #ff80bf);
+            z-index: -1;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 50px;
+            /* Espacio para scroll */
+        }
+
+        h1 {
+            color: #d23c78;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+            font-size: 2rem;
+            font-family: 'Dancing Script', cursive;
+            z-index: 10;
+        }
+
+        #castle-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+        }
+
+        #mitad-izquierda,
+        #mitad-derecha {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            z-index: 2;
+            transition: transform 1s ease;
+            filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.7));
+        }
+
+        #mitad-izquierda {
+            right: 0;
+            transform-origin: left center;
+        }
+
+        #mitad-derecha {
+            left: 0;
+            transform-origin: right center;
+        }
+
+        #invitacion {
+            position: absolute;
+            width: 80%;
+            max-width: 320px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            z-index: 1;
+            transition: all 0.8s ease 0.4s;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(255, 20, 147, 0.6);
+            object-fit: contain;
+        }
+
+        .doors-open #mitad-izquierda {
+            transform: translateX(-100%) rotateY(-80deg);
+        }
+
+        .doors-open #mitad-derecha {
+            transform: translateX(100%) rotateY(80deg);
+        }
+
+        .doors-open #invitacion {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Sección del mapa */
+        #map-section {
+            width: 100%;
+            margin-top: 40px;
+            display: none;
+            /* Oculto inicialmente */
+            flex-direction: column;
+            align-items: center;
+
+        }
+
+        /* Contador regresivo */
+        #countdown-container {
+            margin-top: 30px;
+            text-align: center;
+            color: #d23c78;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        #countdown-container h2 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        #countdown {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            padding: 10px 15px;
+            min-width: 70px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .countdown-box span {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .countdown-box small {
+            font-size: 0.8rem;
+            color: #d23c78;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            #countdown {
+                gap: 8px;
+            }
+
+            .countdown-box {
+                min-width: 60px;
+                padding: 8px 10px;
+            }
+
+            .countdown-box span {
+                font-size: 1.5rem;
+            }
+        }
+
+        #map-image-container {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        #imagenMapa {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(210, 60, 120, 0.5);
+        }
+
+        #map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #embedded-map {
+            width: 40%;
+            /* Más ancho */
+            height: 35%;
+            /* Más alto */
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(210, 60, 120, 0.6);
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Botones */
+        #location-btn {
+            background: linear-gradient(to right, #ff66b3, #ff3399);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            margin: 20px 0;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 10;
+            display: none;
+        }
+
+        #location-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        #back-btn {
+            background: linear-gradient(to right, #ff9966, #ff8844);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            margin-top: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            display: none;
+        }
+
+        /* Efectos visuales */
+        .fairy {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            filter: blur(5px);
+            pointer-events: none;
+            z-index: 3;
+            animation: fairyFly linear infinite;
+        }
+
+        @keyframes fairyFly {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: twinkle 2s infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.2;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            z-index: 4;
+            animation: confettiFall 3s linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+
+            #castle-container {
+                width: 95%;
+                height: 250px;
+            }
+
+            #embedded-map {
+                width: 90%;
+                height: 60%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <h1>¡Toca el castillo para revelar la sorpresa! ✨</h1>
+        <div id="castle-container" onclick="openDoors()">
+            <div id="castle-doors">
+                <img id="mitad-izquierda" src="imagenes/mitadIzquierda.png" alt="Mitad Izquierda">
+                <img id="mitad-derecha" src="imagenes/mitadDerecha.png" alt="Mitad Derecha">
+            </div>
+            <img id="invitacion" src="imagenes/Invitacion.png" alt="Invitación">
+        </div>
+
+        <button id="location-btn" onclick="showMap()">Ver Ubicación</button>
+        <button id="back-btn" onclick="hideMap()">Volver al Castillo</button>
+
+        <div id="map-section">
+            <div id="map-image-container">
+                <div id="countdown-container">
+                    <h2>¡Faltan!</h2>
+                    <div id="countdown">
+                        <div class="countdown-box">
+                            <span id="days">00</span>
+                            <small>Días</small>
+                        </div>
+                        <div class="countdown-box">
+                            <span id="hours">00</span>
+                            <small>Horas</small>
+                        </div>
+                        <div class="countdown-box">
+                            <span id="minutes">00</span>
+                            <small>Minutos</small>
+                        </div>
+                        <div class="countdown-box">
+                            <span id="seconds">00</span>
+                            <small>Segundos</small>
+                        </div>
+                    </div>
+                </div>
+                <img id="imagenMapa" src="imagenes/imagenMapa.png" alt="Mapa del lugar">
+                <div id="map-overlay">
+                    <iframe id="embedded-map"
+                        src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d1886.7695708671235!2d-98.25139746165608!3d18.951782532371908!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTjCsDU3JzA2LjQiTiA5OMKwMTUnMDAuNCJX!5e0!3m2!1ses-419!2smx!4v1746338965794!5m2!1ses-419!2smx"
+                        width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let doorsOpened = false;
+
+        function openDoors() {
+            const container = document.getElementById('castle-container');
+            container.classList.toggle('doors-open');
+
+            // Sonido de puerta
+            const doorSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-door-with-hinges-1801.mp3');
+            doorSound.play();
+
+            // Solo crear efectos la primera vez
+            if (!doorsOpened) {
+                createFairyLights();
+                createStars();
+                createConfetti();
+                document.getElementById('location-btn').style.display = 'block';
+                doorsOpened = true;
+            }
+        }
+
+        function showMap() {
+            // Ocultar elementos principales
+            document.getElementById('castle-container').style.display = 'none';
+            document.getElementById('location-btn').style.display = 'none';
+            document.querySelector('h1').style.display = 'none';
+
+            // Mostrar sección del mapa
+            document.getElementById('map-section').style.display = 'flex';
+            document.getElementById('back-btn').style.display = 'block';
+
+            // Usar tu enlace directo de Google Maps
+            document.getElementById('embedded-map').src = "https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d1886.7695708671235!2d-98.25139746165608!3d18.951782532371908!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f25!3m2!1m1!2zMTjCsDU3JzA2LjQiTiA5OMKwMTUnMDAuNCJX!5e0!3m2!1ses-419!2smx!4v1746338965794!5m2!1ses-419!2smx";
+
+            // Desplazar suavemente a la sección del mapa
+            document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideMap() {
+            // Mostrar elementos principales
+            document.getElementById('castle-container').style.display = 'block';
+            document.getElementById('location-btn').style.display = 'block';
+            document.querySelector('h1').style.display = 'block';
+
+            // Ocultar sección del mapa
+            document.getElementById('map-section').style.display = 'none';
+            document.getElementById('back-btn').style.display = 'none';
+
+            // Desplazar suavemente al inicio
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Contador regresivo
+        function updateCountdown() {
+            // Formato seguro (mes 4 = mayo, 16 = 4 PM)
+            const targetDate = new Date(2025, 4, 18, 16, 0, 0).getTime();
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            console.log("Fecha objetivo:", new Date(targetDate)); // Verifica en consola
+            console.log("Ahora:", new Date(now));
+
+            if (distance <= 0) {
+                document.getElementById('countdown-container').innerHTML =
+                    `<h2>¡El evento ha comenzado! 🎉</h2>`;
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
+        // Iniciar el contador (SOLO UNA VEZ)
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        function createFairyLights() {
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const fairy = document.createElement('div');
+                    fairy.className = 'fairy';
+
+                    const startX = Math.random() * window.innerWidth;
+                    const startY = Math.random() * window.innerHeight;
+                    const endX = startX + (Math.random() * 200 - 100);
+                    const endY = startY + (Math.random() * 200 - 100);
+
+                    fairy.style.left = startX + 'px';
+                    fairy.style.top = startY + 'px';
+                    fairy.style.setProperty('--tx', (endX - startX) + 'px');
+                    fairy.style.setProperty('--ty', (endY - startY) + 'px');
+
+                    const colors = ['#ffb6c1', '#ffc0cb', '#ffd1dc', '#ffd8e1', '#ffe4e1', '#fff0f5'];
+                    fairy.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+                    const size = 5 + Math.random() * 15;
+                    fairy.style.width = size + 'px';
+                    fairy.style.height = size + 'px';
+
+                    const duration = 2 + Math.random() * 3;
+                    fairy.style.animationDuration = duration + 's';
+
+                    document.body.appendChild(fairy);
+
+                    setTimeout(() => {
+                        fairy.remove();
+                    }, duration * 1000);
+                }, i * 300);
+            }
+        }
+
+        function createStars() {
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.animationDelay = Math.random() * 2 + 's';
+
+                const size = 1 + Math.random() * 3;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+
+                document.body.appendChild(star);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#ff66b3', '#ff99cc', '#ffccff', '#ffb3e6', '#ff80bf'];
+
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+                    if (Math.random() > 0.5) {
+                        confetti.style.borderRadius = '50%';
+                    } else {
+                        confetti.style.borderRadius = '0';
+                    }
+
+                    const size = 5 + Math.random() * 10;
+                    confetti.style.width = size + 'px';
+                    confetti.style.height = size + 'px';
+
+                    const duration = 2 + Math.random() * 2;
+                    confetti.style.animationDuration = duration + 's';
+
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, duration * 1000);
+                }, i * 50);
+            }
+        }
+
+        // Detectar si es móvil
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Ajustar para móviles
+        if (isMobile()) {
+            document.body.style.cursor = 'default';
+        }
+    </script>
+</body>
+
+</html>
